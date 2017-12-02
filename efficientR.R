@@ -245,3 +245,60 @@ Unit: nanoseconds
  improved_move(is_double) 330 362  675.9331    401  924.0 2991804 1e+05
           move(is_double) 612 671 1246.6100    818 1533.5 6326187 1e+05
 
+
+## Parallel computing
+
+# Load the parallel package
+library(parallel)
+
+# Store the number of cores in the object no_of_cores
+no_of_cores <- detectCores()
+
+# Print no_of_cores
+no_of_cores
+
+# computation can run parallel if loops can run backwards
+# in some cases parallel computation may be slower due to communication between cores processes
+# Determine the number of available cores
+detectCores()
+
+# Create a cluster via makeCluster
+cl <- makeCluster(2)
+
+# Parallelize this code
+parApply(cl, dd, 2, median)
+
+# Stop the cluster
+stopCluster(cl)
+
+# Create a cluster via makeCluster (2 cores)
+cl <- makeCluster(2)
+
+# Export the play() function to the cluster
+clusterExport(cl, "play")
+
+# Parallelize this code
+res <- parSapply(cl, 1:100, function(i) play())
+
+# Stop the cluster
+stopCluster(cl)
+
+# Set the number of games to play
+no_of_games <- 1e5
+
+## Time serial version
+system.time(serial <- sapply(1:no_of_games, function(i) play()))
+   user  system elapsed 
+  9.584   0.024   9.690
+                             
+## Set up cluster
+cl <- makeCluster(4)
+clusterExport(cl, "play")
+
+## Time parallel version
+system.time(par <- parSapply(cl, 1:no_of_games, function(i) play()))
+   user  system elapsed 
+  0.076   0.008   3.923
+                             
+## Stop cluster
+stopCluster(cl)
