@@ -156,3 +156,92 @@ profvis({
   # Add a fitted line to the plot
   lines(movies$year[j], model$fitted[j], col = "red")
 })     ## Remember the closing brackets!  
+
+
+## Improving a code using matrix
+# Load the microbenchmark package
+library(microbenchmark)
+
+# The previous data frame solution is defined
+# d() Simulates 6 dices rolls
+d <- function() {
+  data.frame(
+    d1 = sample(1:6, 3, replace = TRUE),
+    d2 = sample(1:6, 3, replace = TRUE)
+  )
+}
+
+# Complete the matrix solution
+m <- function() {
+  matrix(sample(1:6, 3, replace = TRUE), 6, ncol = 2)
+}
+
+# Use microbenchmark to time m() and d()
+microbenchmark(
+ data.frame_solution = d(),
+ matrix_solution     = m()
+)
+
+Unit: microseconds
+                expr     min       lq     mean   median       uq      max neval
+ data.frame_solution 169.977 175.0820 206.6752 176.8025 178.6145 2653.062   100
+     matrix_solution   5.720   6.4595  24.7953   7.1850  10.2215 1659.910   100
+
+
+## another optimization
+# Example data
+rolls
+> rolls
+     [,1] [,2]
+[1,]    6    6
+[2,]    6    6
+[3,]    4    5
+
+# Define the previous solution 
+app <- function(x) {
+    apply(x, 1, sum)
+}
+
+# Define the new solution
+r_sum <- function(x) {
+    rowSums(x)
+}
+
+# Compare the methods
+microbenchmark(
+    app_sol = app(rolls),
+    r_sum_sol = r_sum(rolls)
+)
+
+Unit: microseconds
+      expr    min     lq     mean  median      uq      max neval
+   app_sol 38.187 40.496 69.88488 41.2390 42.1975 2756.885   100
+ r_sum_sol  8.613  9.987 30.37558 11.3725 12.0330 1930.036   100
+
+## Using && instead of &
+# && will not evaluate second logical value if first is FALSE
+# Example data
+is_double
+
+# Define the previous solution
+move <- function(is_double) {
+    if (is_double[1] & is_double[2] & is_double[3]) {
+        current <- 11 # Go To Jail
+    }
+}
+
+# Define the improved solution
+improved_move <- function(is_double) {
+    if (is_double[1] && is_double[2] && is_double[3]) {
+        current <- 11 # Go To Jail
+    }
+}
+
+## microbenchmark both solutions
+microbenchmark(improved_move(is_double), move(is_double), times = 1e5)
+
+Unit: nanoseconds
+                     expr min  lq      mean median     uq     max neval
+ improved_move(is_double) 330 362  675.9331    401  924.0 2991804 1e+05
+          move(is_double) 612 671 1246.6100    818 1533.5 6326187 1e+05
+
