@@ -1,0 +1,9 @@
+#Example of code that deletes old file in the folder
+
+@echo off
+ECHO start deleting old files that are older than 180 days...
+:: set up the path to the folder
+set DEST_DIR=F:\Folder
+
+:: delete files older than 180 days
+forfiles /p %DEST_DIR% /s /m *.* /D -180 /C "cmd /c del @path"
